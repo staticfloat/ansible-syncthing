@@ -32,30 +32,8 @@
 - name: set ownership
   file: path={{syncthing_home}} recurse=yes owner={{syncthing_user}} group={{syncthing_user}}
 
-- name: supervisor | install
-  apt: pkg=supervisor state=present
-  when: syncthing_use_supervisor
-
-- name: supervisor | install config
-  template: src=supervisor.conf dest=/etc/supervisor/conf.d/syncthing.conf mode=755
-  register: supervisor_conf
-  when: syncthing_use_supervisor
-
-- name: supervisor | reload
-  command: supervisorctl reload
-  when: syncthing_use_supervisor and supervisor_conf|changed
-
-- name: systemd | install service
-  template: src=syncthing.service dest=/etc/systemd/system/syncthing.service mode=755
-  when: syncthing_use_systemd
-
-- name: systemd | activate service
-  service: name=syncthing enabled=yes state=started
-  when: syncthing_use_systemd
-
-- name: systemd | reload service
-  service: name=syncthing state=reloaded
-  when: syncthing_use_systemd and systemd_conf_sysemd|changed
+- name: start syncthing
+  service: name=syncthing state=started
 
 - name: waiting for configfile (takes some time)
   wait_for: path={{syncthing_home}}/.config/syncthing/config.xml
